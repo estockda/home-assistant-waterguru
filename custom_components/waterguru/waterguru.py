@@ -5,8 +5,8 @@ import boto3
 import botocore
 import requests
 from requests_aws4auth import AWS4Auth
-from warrant import Cognito
-from warrant.aws_srp import AWSSRP
+from pycognito import Cognito
+from pycognito.aws_srp import AWSSRP
 
 from .waterguru_device import WaterGuruDevice
 
@@ -67,7 +67,7 @@ class WaterGuru:
 
         method = 'POST'
         headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
-        body = {"userId":userId, "clientType":"WEB_APP", "clientVersion":"0.2.3"}
+        body = {"userId":userId, "clientType":"WEB_APP", "clientVersion":"0.2.3", "clip": False}
         service = 'lambda'
         url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-getDashboardView/invocations'
         region = 'us-west-2'
