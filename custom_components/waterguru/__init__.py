@@ -16,7 +16,11 @@ from .waterguru import WaterGuru, WaterGuruApiError, WaterGuruDevice
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.SWITCH,
+]
 INTERVAL = timedelta(minutes=30) # water temperature is updated every 30 minutes
 
 WaterGuruDataCoordinatorType = DataUpdateCoordinator[dict[str, WaterGuruDevice]]
