@@ -31,7 +31,6 @@ class WaterGuruResetButton(ButtonEntity):
         return DeviceInfo(identifiers={(DOMAIN, self.device.device_id)})
 
     async def async_press(self):
-        # Extract the device object from coordinator and locate nested sensor data
         device_data = self.coordinator.data.get(self.device.device_id)
         if not device_data:
             raise HomeAssistantError("Device data not available.")
@@ -51,7 +50,7 @@ class WaterGuruResetButton(ButtonEntity):
                 "Enable the 'Temporarily Allow Early Cassette Replacement' switch to bypass."
             )
 
-        api = self.hass.data[DOMAIN]["api"]
+        api = self.coordinator.api
         await self.hass.async_add_executor_job(api.reset_cassette, self.device.device_id)
 
         await self.coordinator.async_request_refresh()
