@@ -35,7 +35,8 @@ class WaterGuruResetButton(ButtonEntity):
         if not device_data:
             raise HomeAssistantError("Device data not available.")
             
-        days_remaining = device_data.sensors.get("cassette_days_remaining", 0)
+        pct_remaining = device_data.sensors.get("cassette", 0)
+        days_remaining = device_data.sensors.get("cassette_days_remaining")
 
         registry = er.async_get(self.hass)
         switch_unique_id = f"{self.device.device_id}_cassette_override"
@@ -44,11 +45,14 @@ class WaterGuruResetButton(ButtonEntity):
         override_state = self.hass.states.get(override_switch_id) if override_switch_id else None
         is_overridden = override_state is not None and override_state.state == STATE_ON
 
-        if days_remaining > 0 and not is_overridden:
-            raise HomeAssistantError(
-                f"Cannot replace: {days_remaining} days remaining. "
-                "Enable the 'Temporarily Allow Early Cassette Replacement' switch to bypass."
-            )
+        if pct_remaining > 0 and not is_overridden:
+            if days_remaining is not None:
+                error_msg = f"Cannot replace: {days_remaining} days remaining."
+            else:
+                error_msg = f"Cannot replace: {pct_remaining}% remaining."
+                
+            error_msg += " Enable the 'Temporarily Allow Early Cassette Replacement' switch to bypass."
+            raise HomeAssistantError(error_msg)
 
         api = self.coordinator.api
         await self.hass.async_add_executor_job(api.reset_cassette, self.device.device_id)
