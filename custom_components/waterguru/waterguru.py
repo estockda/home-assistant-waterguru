@@ -5,8 +5,8 @@ import boto3
 import botocore
 import requests
 from requests_aws4auth import AWS4Auth
-from warrant import Cognito
-from warrant.aws_srp import AWSSRP
+from pycognito import Cognito
+from pycognito.aws_srp import AWSSRP
 
 from .waterguru_device import WaterGuruDevice
 

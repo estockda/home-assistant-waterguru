@@ -6,6 +6,6 @@
   "dependencies": [],
   "documentation": "https://github.com/dwradcliffe/home-assistant-waterguru",
   "iot_class": "cloud_polling",
-  "requirements": ["requests_aws4auth", "boto3", "warrant"],
+  "requirements": ["requests_aws4auth", "boto3", "pycognito"],
   "version": "0.0.1"
 }
