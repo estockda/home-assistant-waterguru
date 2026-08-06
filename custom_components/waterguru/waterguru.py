@@ -67,7 +67,7 @@ class WaterGuru:
 
         method = 'POST'
         headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
-        body = {"userId":userId, "clientType":"WEB_APP", "clientVersion":"0.2.3"}
+        body = {"userId":userId, "clientType":"WEB_APP", "clientVersion":"0.2.3", "clip": False}
         service = 'lambda'
         url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-getDashboardView/invocations'
         region = 'us-west-2'
