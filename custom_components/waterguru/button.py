@@ -54,11 +54,7 @@ class WaterGuruResetButton(ButtonEntity):
             error_msg += " Enable the 'Temporarily Allow Early Cassette Replacement' switch to bypass."
             raise HomeAssistantError(error_msg)
 
-        api = self.coordinator.api
-        await self.hass.async_add_executor_job(api.reset_cassette, self.device.device_id)
-
-        await self.coordinator.async_request_refresh()
-
+        # 1. Turn off the override switch immediately for UI responsiveness
         if is_overridden and override_switch_id:
             await self.hass.services.async_call(
                 "switch",
@@ -66,3 +62,10 @@ class WaterGuruResetButton(ButtonEntity):
                 {"entity_id": override_switch_id},
                 blocking=False
             )
+
+        # 2. Execute the reset command (incurs network latency)
+        api = self.coordinator.api
+        await self.hass.async_add_executor_job(api.reset_cassette, self.device.device_id)
+
+        # 3. Refresh the sensor data (incurs network latency)
+        await self.coordinator.async_request_refresh()
