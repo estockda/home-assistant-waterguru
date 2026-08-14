@@ -47,8 +47,11 @@ def _async_check_cassette_repairs(
 
     for device_id, device in devices.items():
         issue_id = f"{CASSETTE_ISSUE_PREFIX}{device_id}"
-        days = device.sensors.get("cassette_days_remaining")
-        if days == 0:
+        
+        # Evaluate percentage instead of conditional days text
+        pct_remaining = device.sensors.get("cassette")
+        
+        if pct_remaining == 0:
             ir.async_create_issue(
                 hass,
                 DOMAIN,
@@ -60,7 +63,6 @@ def _async_check_cassette_repairs(
             )
         else:
             ir.async_delete_issue(hass, DOMAIN, issue_id)
-
 
 def _async_clear_cassette_repairs(
     hass: HomeAssistant, device_ids: set[str]
