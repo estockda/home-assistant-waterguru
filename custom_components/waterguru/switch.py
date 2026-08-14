@@ -22,7 +22,7 @@ class WaterGuruOverrideSwitch(SwitchEntity):
         self.coordinator = coordinator
         self.device = device
         self._attr_unique_id = f"{device.device_id}_cassette_override"
-        self._attr_name = "Temporarily Allow Early Cassette Replacement"
+        self._attr_translation_key = "cassette_override"
         self._attr_is_on = False
 
     @property
