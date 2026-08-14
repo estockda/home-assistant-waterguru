@@ -24,7 +24,7 @@ class WaterGuruResetButton(ButtonEntity):
         self.coordinator = coordinator
         self.device = device
         self._attr_unique_id = f"{device.device_id}_replace_cassette"
-        self._attr_name = "Replace Cassette"
+        self._attr_translation_key = "replace_cassette"
 
     @property
     def device_info(self):
