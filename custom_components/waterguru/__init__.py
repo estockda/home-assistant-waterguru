@@ -12,7 +12,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN
+from .const import DOMAIN, CASSETTE_ISSUE_PREFIX
 from .waterguru import WaterGuru, WaterGuruApiError, WaterGuruDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,7 +23,6 @@ PLATFORMS: list[Platform] = [
     Platform.SWITCH,
 ]
 INTERVAL = timedelta(minutes=30) # water temperature is updated every 30 minutes
-CASSETTE_ISSUE_PREFIX = "cassette_empty_"
 
 # device IDs we've synced cassette repairs for, keyed by config entry id
 _cassette_known_devices: dict[str, set[str]] = {}
@@ -56,7 +55,7 @@ def _async_check_cassette_repairs(
                 hass,
                 DOMAIN,
                 issue_id,
-                is_fixable=False,
+                is_fixable=True,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key="cassette_empty",
                 translation_placeholders={"name": device.name},
