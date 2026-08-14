@@ -31,5 +31,17 @@
         }
       }
     }
+  },
+  "entity": {
+    "button": {
+      "replace_cassette": {
+        "name": "Replace Cassette"
+      }
+    },
+    "switch": {
+      "cassette_override": {
+        "name": "Temporarily Allow Early Cassette Replacement"
+      }
+    }
   }
 }
