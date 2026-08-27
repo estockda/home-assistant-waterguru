@@ -110,5 +110,33 @@ class WaterGuru:
         except requests.exceptions.Timeout as e:
             raise WaterGuruApiError("Timeout while accessing WaterGuru API") from e
 
+    def measure(self, pod_id: str) -> None:
+        """Trigger a manual measurement via AWS Lambda invocation."""
+        _LOGGER.info("Triggering manual measurement on WaterGuru pod %s...", pod_id)
+
+        auth, userId = self._get_auth_and_user()
+
+        method = 'POST'
+        headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
+        url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-measure/invocations'
+        body = {
+            "asapReq": {
+                "bleRange": False,
+                "doOnce": True
+            },
+            "podId": int(pod_id),
+            "clientType": "WEB_APP",
+            "clientVersion": "0.2.3",
+            "reqUserId": userId,
+        }
+
+        try:
+            response = requests.request(method, url, auth=auth, json=body, headers=headers, timeout=9.9)
+        except requests.exceptions.Timeout as e:
+            raise WaterGuruApiError("Timeout while accessing WaterGuru API") from e
+
+        if response.status_code not in (200, 202):
+            raise WaterGuruApiError(f"Failed to trigger measurement: {response.status_code} - {response.text}")
+
         if response.status_code not in (200, 202):
             raise WaterGuruApiError(f"Failed to reset cassette: {response.status_code} - {response.text}")
