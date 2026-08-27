@@ -65,7 +65,7 @@ class WaterGuruResetButton(ButtonEntity):
 
         # 2. Execute the reset command (incurs network latency)
         api = self.coordinator.api
-        await self.hass.async_add_executor_job(api.reset_cassette, self.device.device_id)
+        await self.hass.async_add_executor_job(api.reset_cassette, device_data.serial_number)
 
         # 3. Refresh the sensor data (incurs network latency)
         await self.coordinator.async_request_refresh()
