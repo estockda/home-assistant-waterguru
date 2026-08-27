@@ -36,6 +36,9 @@
     "button": {
       "replace_cassette": {
         "name": "Replace Cassette"
+      },
+      "manual_measurement": {
+        "name": "Manual Measurement"
       }
     },
     "switch": {
