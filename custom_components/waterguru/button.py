@@ -22,13 +22,15 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the WaterGuru reset button."""
+    """Set up the WaterGuru reset and manual measurement buttons."""
     coordinator: WaterGuruDataCoordinatorType = hass.data[DOMAIN][config_entry.entry_id]
 
-    async_add_entities(
-        WaterGuruResetButton(coordinator, device)
-        for device in coordinator.data.values()
-    )
+    entities: list[ButtonEntity] = []
+    for device in coordinator.data.values():
+        entities.append(WaterGuruResetButton(coordinator, device))
+        entities.append(WaterGuruMeasureButton(coordinator, device))
+
+    async_add_entities(entities)
 
 
 class WaterGuruResetButton(ButtonEntity):
@@ -93,3 +95,36 @@ class WaterGuruResetButton(ButtonEntity):
             )
 
         await self.coordinator.async_request_refresh()
+
+class WaterGuruMeasureButton(ButtonEntity):
+    """Button that triggers an on-demand measurement on the WaterGuru pod."""
+
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(
+        self, coordinator: WaterGuruDataCoordinatorType, device: WaterGuruDevice
+    ) -> None:
+        """Initialize the button."""
+        self.coordinator = coordinator
+        self.device = device
+        self._attr_unique_id = f"{device.device_id}_manual_measurement"
+        self._attr_translation_key = "manual_measurement"
+        self._attr_icon = "mdi:water-sync"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info."""
+        return DeviceInfo(identifiers={(DOMAIN, self.device.device_id)})
+
+    async def async_press(self) -> None:
+        """Trigger a manual measurement on the WaterGuru pod."""
+        device_data = self.coordinator.data.get(self.device.device_id)
+        if not device_data:
+            raise HomeAssistantError("Device data not available.")
+
+        if not device_data.serial_number:
+            raise HomeAssistantError("No podId found for this WaterBody. Cannot trigger measurement.")
+
+        api = self.coordinator.api
+        await self.hass.async_add_executor_job(api.measure, device_data.serial_number)
