@@ -8,6 +8,16 @@ NOTE: This is not any kind of official integration or support. Use at your own r
 
 This integration requires Home Assistant 2024.4 or later.
 
+## Features
+
+### Cassette Replacement
+The integration provides a native button entity to reset the cassette life to 100% after a physical replacement. 
+* **Repair Flow:** When the API reports a cassette is empty, Home Assistant will automatically generate a repair issue. Clicking through this repair flow prompts you to confirm the physical replacement and automatically triggers the reset.
+* **Safety Override:** To prevent accidental resets, the reset button will fail to execute if the cassette is not completely empty. To replace a cassette early, you must first toggle on the "Temporarily Allow Early Cassette Replacement" switch before pressing the reset button.
+
+### Manual Measurement
+The integration provides a button entity to request a manual water measurement. Because the WaterGuru pod operates on battery power, it sleeps to conserve energy and only connects to the network every 30 minutes. When this button is pressed, the API instructs the device to perform a measurement during its next scheduled check-in. As a result, it can take up to 45 minutes for the new measurement data to reflect in Home Assistant.
+
 ## Usage
 1. Install HACS if you haven't already (see [installation guide](https://hacs.xyz/docs/setup/prerequisites)).
 2. Add custom repository `https://github.com/dwradcliffe/home-assistant-waterguru` as "Integration" in the settings tab of HACS.
