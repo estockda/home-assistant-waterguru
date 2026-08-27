@@ -45,7 +45,7 @@ class WaterGuru:
         refresh_token = tokens['AuthenticationResult']['RefreshToken']
         access_token = tokens['AuthenticationResult']['AccessToken']
         
-        u=Cognito(pool_id,client_id,id_token=id_token,refresh_token=refresh_token,access_token=access_token)
+        u = Cognito(pool_id, client_id, id_token=id_token, refresh_token=refresh_token, access_token=access_token)
         user = u.get_user()
         userId = user._metadata['username']
 
@@ -54,7 +54,7 @@ class WaterGuru:
         identity_response = identity_client.get_id(IdentityPoolId=identity_pool_id)
         identity_id = identity_response['IdentityId']
 
-        credentials_response = identity_client.get_credentials_for_identity(IdentityId=identity_id,Logins={idp_pool:id_token})
+        credentials_response = identity_client.get_credentials_for_identity(IdentityId=identity_id, Logins={idp_pool:id_token})
         credentials = credentials_response['Credentials']
         
         auth = AWS4Auth(
@@ -75,7 +75,7 @@ class WaterGuru:
 
         method = 'POST'
         headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
-        body = {"userId":userId, "clientType":"WEB_APP", "clientVersion":"0.2.3", "clip": False}
+        body = {"userId": userId, "clientType": "WEB_APP", "clientVersion": "0.2.3", "clip": False}
         url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-getDashboardView/invocations'
 
         try:
@@ -86,17 +86,29 @@ class WaterGuru:
         data = response.json()
         return {waterBodyData['waterBodyId']: WaterGuruDevice(waterBodyData) for waterBodyData in data['waterBodies']}
 
-    def reset_cassette(self, water_body_id: str):
-        """
-        MOCK: Reset the cassette life.
-        Actual endpoint and payload to be captured on next cassette replacement.
-        """
-        _LOGGER.info("MOCK: Resetting cassette for %s", water_body_id)
-        
-        # auth, userId = self._get_auth_and_user()
-        # method = 'POST'
-        # headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
-        # body = {"userId": userId, "waterBodyId": water_body_id, ...}
-        # url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-replaceCassette/invocations'
-        
-        return True
+    def reset_cassette(self, pod_id: str) -> None:
+        """Reset the cassette percentage to 100% via AWS Lambda invocation."""
+        _LOGGER.info("Resetting cassette on WaterGuru pod %s...", pod_id)
+
+        auth, userId = self._get_auth_and_user()
+
+        method = 'POST'
+        headers = {'User-Agent': 'aws-sdk-iOS/2.24.3 iOS/14.7.1 en_US invoker', 'Content-Type': 'application/x-amz-json-1.0'}
+        url = 'https://lambda.us-west-2.amazonaws.com/2015-03-31/functions/prod-managePod/invocations'
+        body = {
+            "podId": int(pod_id),
+            "refillableReq": {
+                "padPctLeft": 100
+            },
+            "clientType": "WEB_APP",
+            "clientVersion": "0.2.3",
+            "reqUserId": userId,
+        }
+
+        try:
+            response = requests.request(method, url, auth=auth, json=body, headers=headers, timeout=9.9)
+        except requests.exceptions.Timeout as e:
+            raise WaterGuruApiError("Timeout while accessing WaterGuru API") from e
+
+        if response.status_code not in (200, 202):
+            raise WaterGuruApiError(f"Failed to reset cassette: {response.status_code} - {response.text}")
