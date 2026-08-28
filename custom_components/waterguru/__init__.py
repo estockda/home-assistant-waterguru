@@ -12,14 +12,17 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN
+from .const import DOMAIN, CASSETTE_ISSUE_PREFIX
 from .waterguru import WaterGuru, WaterGuruApiError, WaterGuruDevice
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.SWITCH,
+]
 INTERVAL = timedelta(minutes=30) # water temperature is updated every 30 minutes
-CASSETTE_ISSUE_PREFIX = "cassette_empty_"
 
 # device IDs we've synced cassette repairs for, keyed by config entry id
 _cassette_known_devices: dict[str, set[str]] = {}
@@ -43,20 +46,22 @@ def _async_check_cassette_repairs(
 
     for device_id, device in devices.items():
         issue_id = f"{CASSETTE_ISSUE_PREFIX}{device_id}"
-        days = device.sensors.get("cassette_days_remaining")
-        if days == 0:
+        
+        # Evaluate percentage instead of conditional days text
+        pct_remaining = device.sensors.get("cassette")
+        
+        if pct_remaining == 0:
             ir.async_create_issue(
                 hass,
                 DOMAIN,
                 issue_id,
-                is_fixable=False,
+                is_fixable=True,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key="cassette_empty",
                 translation_placeholders={"name": device.name},
             )
         else:
             ir.async_delete_issue(hass, DOMAIN, issue_id)
-
 
 def _async_clear_cassette_repairs(
     hass: HomeAssistant, device_ids: set[str]
@@ -91,6 +96,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_method=_update_method,
         update_interval=INTERVAL,
     )
+    
+    # Expose the API client to other platforms
+    coordinator.api = waterguru
+
     await coordinator.async_config_entry_first_refresh()
 
     hass.data[DOMAIN][entry.entry_id] = coordinator

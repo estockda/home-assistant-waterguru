@@ -1,27 +1,50 @@
 {
-    "config": {
-      "flow_title": "WaterGuru",
-      "step": {
-        "user": {
-          "title": "Connect to WaterGuru",
-          "data": {
-            "username": "Username",
-            "password": "Password"
-          }
+  "config": {
+    "flow_title": "WaterGuru",
+    "step": {
+      "user": {
+        "title": "Connect to WaterGuru",
+        "data": {
+          "username": "Username",
+          "password": "Password"
         }
-      },
-      "error": {
-        "cannot_connect": "Failed to connect",
-        "unknown": "Unexpected Error"
-      },
-      "abort": {
-        "already_configured": "Account is already configured"
       }
     },
-    "issues": {
-      "cassette_empty": {
-        "title": "Replace the WaterGuru cassette",
-        "description": "The cassette for {name} has 0 days remaining. After you replace it, this repair clears automatically once WaterGuru reports days remaining again."
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "unknown": "Unexpected Error"
+    },
+    "abort": {
+      "already_configured": "Account is already configured"
+    }
+  },
+  "issues": {
+    "cassette_empty": {
+      "title": "Replace the WaterGuru cassette",
+      "description": "The cassette for {name} is empty. Replacing the cassette physically and submitting this form will reset the sensor.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Reset Cassette",
+            "description": "Confirm that you have physically replaced the cassette for {name}."
+          }
+        }
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "replace_cassette": {
+        "name": "Replace Cassette"
+      },
+      "manual_measurement": {
+        "name": "Manual Measurement"
+      }
+    },
+    "switch": {
+      "cassette_override": {
+        "name": "Temporarily Allow Early Cassette Replacement"
       }
     }
   }
+}
